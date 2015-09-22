@@ -77,8 +77,8 @@ unsigned long windowStartTime;
 byte ATuneModeRemember=2;
 
 double aTuneStep=500;
-double aTuneNoise=1;
-unsigned int aTuneLookBack=20;
+double aTuneNoise=3;
+unsigned int aTuneLookBack=60;
 
 boolean tuning = false;
 
