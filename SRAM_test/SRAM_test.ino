@@ -74,12 +74,12 @@ void writeToRam(byte address, byte message) {
     //Serial.println(len);
     
         
-            Serial.print("writ byte: ");
-            for (int j = 0; j < 8; j++) {
-                Serial.print(bitRead(message, j));
-            }
-        Serial.print(" char: ");
-        Serial.println((char)message);
+Serial.print("writ byte: ");
+for (int j = 0; j < 8; j++) {
+    Serial.print(bitRead(message, j));
+}
+Serial.print(" char: ");
+Serial.println((char)message);
         //write address to port
         digitalWrite(Add0, bitRead(address, 0));
         digitalWrite(Add1, bitRead(address, 1));

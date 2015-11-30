@@ -1,0 +1,128 @@
+<html>
+	<head>
+		<title>Standalone SWTPC Emulator</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+		<link rel="stylesheet" type="text/css" href="/torok.css">
+	</head>
+	<body>
+		<center><h2>Standalone SWTPC Emulator</h2>
+			<p>Version: June 2014</p>
+			<p><img src="SWTPC_Logo.jpg"></p>
+		</center>
+    	<h3>Introduction</h3>
+		My first computer was a SWTPC compatible <a target="new" href="http://en.wikipedia.org/wiki/Newbear_77-68"> 
+		Newbear 77/68</a> with a 1MHz Motorola MC6800 CPU, MC6850 ACIA, 4 kByte RAM and a SWTBUG ROM.
+		I used this system between 1978-1980, for experiment control and simple signal processing applications in the 
+		Department of Physiology at the University Pécs in Hungary. Since I had neither an operating system, nor 
+		programming languages, I developed the programs with "hand assembly", a very time-consuming way of programming. 
+		Since at the end of 1979 my lab received a Digital Equipment PDP11/40 computer with RT11 operating system with Fortran compiler and Macro assembler, 
+		the Motorola 6800 system became obsolete. Since the 6800 instruction set was more or less a subset of the 
+		PDP11 series CPUs, it was very easy for me to develop programs for the PDP11 with MACRO11.    
+
+    	<h3>Purpose</h3>
+		To emulate the Southwest Technical Products Corporation SWTPC personal computer on a Arduino DUE
+		microcontroller. 
+	    The emulator was developed using open source hardware and software components. 
+		The microcontroller is an <a href="http://arduino.cc/en/Main/arduinoBoardDue"> 
+		Arduino DUE</a>, a low-cost microcontroller board (~55$) available from different companies.
+		The development system is available for free from <a href="http://www.arduino.cc"> www.arduino.cc</a><br> 
+		
+		The standalone emulator is standalone port of the SIMH emulator written by William Beech. 
+		SIMH is available from <a href="http://simh.trailing-edge.com">http://simh.trailing-edge.com</a><br>
+
+		Technical information for SWTPC is available form: <a target="new" href="http://www.swtpc.com/mholley/index.html"> 
+		http://www.swtpc.com/mholley/index.html</a>
+		<br><br>
+		Software for the SWTPC is available form: <a target="new" href="http://www.flexusergroup.com/flexusergroup/fug5.htm"> 
+		http://www.flexusergroup.com/flexusergroup/fug5.htm</a>
+		
+		<h3>SWTPC Emulator</h3>
+		<p>
+	    This software is the Aduino DUE port of the <a href="http://simh.trailing-edge.com">SIMH</a> simulator developed by William Beech.
+		The CPU emulation is a nearly 1:1 implementation of file m6800.c in the SIMH package,
+		the rest of the code is nearly a complete rewrite of the code for standalone operation.
+		<br><br>
+   
+		Memory map (Hexadecimal Addresses):<br>
+		0000-7FFF: RAM<br>
+		8004-8007: MC6850 ACIA (UART)<br>
+		A000-DFFF: RAM<br>
+		E000-FFFF: SWTBUG Monitor ROM (visible on every 1 k memory location)<br><br>
+   
+		Emulated components:<br>
+		Motorola MC6800 CPU (SWTPC mp-a)<br> 
+		Motorola MC6850 UART (SWTPC mp-s)<br>
+		48k RAM<br><br>
+
+		The dc-4 disk controller is not implemented!<br>
+		The implementation would be easy using a SD card and the modified user interface of my <A target="new" href="http://torok.info/computing/pdp11/tu58/index.htm"> 
+		TU58 Dectape II Emulator</A> project.<br><br>
+   
+		TCS 8k Basic, is preloaded to memory location (Hex) 0100
+		TSC 8k Basic program and documentation are available from: <a target="new" href="http://www.flexusergroup.com/flexusergroup/fug4.htm"> 
+		http://www.flexusergroup.com/flexusergroup/fug4.htm</a>
+		To start Basic type either G (uppercase G) or J 0100 on the SWTBUG command line.
+		To exit from Basic interpreter type exit.
+   
+		SWTBUG accepts only UPPER case letters as commands.
+		TCS basic is lower case letter compatible. 
+		</p>	
+		
+		<h3>Uploading the emulator Firmware to Arduino DUE:</h3>
+		<p>
+			Download the <a target="new" href="http:SWTPC.zip"> 
+		    compressed source files</a> from here,<br>
+			Uncompress SWTPC.zip,<br>
+			open swtpc.ino with Arduino IDE,<br>
+			Under Menu -> Tools -> Board select board Arduino Due (Programming Port),<br>
+			Under Menu -> Tools -> Port select the appropriate COM port (Programming Port),<br>
+			upload the program to Arduino DUE on the programming port.
+		</p>
+		
+		<h3>Using the emulated SWTPC</h3>
+		<p>
+		Using a terminal emulator with USB:<br> 
+        1. Connect a micro USB cable to the programming port on Arduino DUE.<br>
+		2. Connect the end of the USB cable to a personal computer.<br>
+		3. Find out the device name assigned to Arduino, e.g., COM7<br>
+		4. Start a terminal emulator on your PC (e.g., putty, IVT220, etc.)<br>
+		5. Setup serial communication parameters (Portname, Baudrate=9600 baud, no protocol)<br><br>
+		
+		Using a terminal or terminal emulator with a RS232 interface:<br> 
+        1. Connect a 3.3V TTL-to RS232 level converter to Arduino pins 0 and 1.<br>
+		2. Connect the RS232 lelel converter to the terminal or terminal emulator.<br>
+		3. Start a terminal emulator on your PC (e.g., putty, IVT220, etc.)<br>
+		3. Setup serial communication parameters (Portname, Baudrate=9600 baud, no protocol)<br><br>
+		
+		After starting the terminal emulation you'll see a $ SWTBUG prompt at the beginning of the line.<br>
+        SWTBUG will accept only upper case characters. The SWTBUG Users Guide is available from: <A target="new" href="SWTBUG_Users_Guide.pdf"> 
+		SWTBUG Users Guide</A><br><br>
+
+		To start TSC 8k MicroBasic type G (uppercase G) or J 0100 in SWTBUG<br>
+        TSC 8k MicroBasic is not case sensitive, you can enter lower case characters. To exit TSC Basic type exit.<br><br>
+		An introduction to TSC Micro Basic is available from: <A target="new" href="TSC_MicroBasic.pdf"> 
+		TSC Micro Basic Plus Manual</A><br><br>
+        </p>
+ 		
+ 		<h3>Contact Information</h3>
+		Béla Török Email: bel<img src="at.gif" align="center">belatorok.com
+
+		<center>
+		<p><img src="SWTPC_emu_start_screen.png"></p>
+		SWTPC Emulator, SWTBUG Memory Examine function.
+		<br><br>
+		
+		<p><img src="SWTPC_emu_TSCBasic.png"></p>
+		TSC 8k MicroBasic.
+		<br><br>
+
+		<p><img src="ArduinoDue_RS232_small.jpg"></p>
+		Arduino Due with TTL to RS232 Level Converter <A target="new" href="ArduinoDue_RS232.jpg">Download high resolution image</A>
+		<br><br>
+
+
+		</center>
+
+		
+	</body>
+</html>
