@@ -1,6 +1,6 @@
 #include <Adafruit_NeoPixel.h>
 #ifdef __AVR__
-#include <avr/power.h>
+  #include <avr/power.h>
 #endif
 
 #define PIN 3
@@ -20,20 +20,35 @@ Adafruit_NeoPixel strip = Adafruit_NeoPixel(210, PIN, NEO_GRB + NEO_KHZ800);
 // on a live circuit...if you must, connect GND first.
 
 void setup() {
-  pinMode(6, OUTPUT);
-  pinMode(7, INPUT_PULLUP);
-  digitalWrite(7, HIGH);
+  // This is for Trinket 5V 16MHz, you can remove these three lines if you are not using a Trinket
+
+  // End of trinket special code
+
+
   strip.begin();
   strip.show(); // Initialize all pixels to 'off'
 }
 
 void loop() {
-
+  // Some example procedures showing how to display to the pixels:
+ /* colorWipe(strip.Color(255, 0, 0), 50); // Red
+  colorWipe(strip.Color(0, 255, 0), 50); // Green
+  colorWipe(strip.Color(0, 0, 255), 50); // Blue
+  // Send a theater pixel chase in...
+  theaterChase(strip.Color(127, 127, 127), 50); // White
+  theaterChase(strip.Color(127, 0, 0), 50); // Red
+  theaterChase(strip.Color(0, 0, 127), 50); // Blue
+*/
+  uint32_t c = strip.Color(255, 255, 255);
   
-  if (!digitalRead(7)) {
-
-    fadeInFadeOutWheel(10, 5000, 255, 81);
-  } 
+  
+  
+  rainbow(0);
+  //rainbowCycle(20);
+  //theaterChaseRainbow(50);
+  //theaterChase(strip.Color(255, 255, 255), 50); // White
+  //theaterChase(strip.Color(127, 127, 127), 50); // White
+ // colorWipe(strip.Color(0, 255, 0), 50); // Green
 }
 
 // Fill the dots one after the other with a color
@@ -122,83 +137,5 @@ uint32_t Wheel(byte WheelPos) {
 }
 
 
-uint32_t intensityWheel(byte WheelPos, double intensity) {
-  WheelPos = 255 - WheelPos;
-  if(WheelPos < 85) {
-    return strip.Color((255 - WheelPos * 3) * intensity, 0, (WheelPos * 3) * intensity);
-  }
-  if(WheelPos < 170) {
-    WheelPos -= 85;
-    return strip.Color(0, (WheelPos * 3) * intensity, (255 - WheelPos * 3) * intensity);
-  }
-  WheelPos -= 170;
-  return strip.Color((WheelPos * 3) * intensity, (255 - WheelPos * 3) * intensity, 0);
-}
 
-
-void fadeInFadeOut(int speed, int holdTime, int r, int g, int b) {
-
-  float intensity = 0;
-  uint32_t color;
-  for (int i = 0; i < 100; i++) {
-
-    intensity += 0.01;
-    color = strip.Color(r * intensity, g * intensity, b * intensity);
-    for(int j=0; j<strip.numPixels(); j++) {
-
-      strip.setPixelColor(j, color);
-    }
-    strip.show();
-    delay(speed);
-  }
-  intensity = 1;
-  delay(holdTime);
-  for (int i = 100; i > 0; i--) {
-
-    intensity -= 0.01;
-    color = strip.Color(r * intensity, g * intensity, b * intensity);
-    for(int j=0; j<strip.numPixels(); j++) {
-
-      strip.setPixelColor(j, color);
-    }
-    strip.show();
-    delay(speed);
-  }
-}
-
-void fadeInFadeOutWheel(int speed, int holdTime, int startColor, int endColor) {
-
-  double intensity = 0;
-  int colorDifference = endColor - startColor;
-  double wheelPos = startColor;
-  double increment = colorDifference / 100.0;
-  uint32_t color;
-  for (int i = 0; i < 100; i++) {
-
-    wheelPos += increment;
-    intensity += 0.01;
-    color = intensityWheel((uint8_t)wheelPos, intensity);
-    for(int j=0; j<strip.numPixels(); j++) {
-
-      strip.setPixelColor(j, color);
-    }
-    strip.show();
-    delay(speed);
-  }
-  intensity = 1;
-  wheelPos = endColor;
-  delay(holdTime);
-  for (int i = 100; i > 0; i--) {
-
-    wheelPos -= increment;
-    intensity -= 0.01;
-    color = intensityWheel((uint8_t)wheelPos, intensity);
-    for(int j=0; j<strip.numPixels(); j++) {
-
-      strip.setPixelColor(j, color);
-    }
-    strip.show();
-    delay(speed);
-  }
-}
 
