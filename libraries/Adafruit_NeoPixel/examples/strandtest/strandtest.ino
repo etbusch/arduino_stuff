@@ -3,7 +3,7 @@
   #include <avr/power.h>
 #endif
 
-#define PIN 3
+#define PIN 6
 
 // Parameter 1 = number of pixels in strip
 // Parameter 2 = Arduino pin number (most are valid)
@@ -12,7 +12,7 @@
 //   NEO_KHZ400  400 KHz (classic 'v1' (not v2) FLORA pixels, WS2811 drivers)
 //   NEO_GRB     Pixels are wired for GRB bitstream (most NeoPixel products)
 //   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(210, PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(60, PIN, NEO_GRB + NEO_KHZ800);
 
 // IMPORTANT: To reduce NeoPixel burnout risk, add 1000 uF capacitor across
 // pixel power leads, add 300 - 500 Ohm resistor on first pixel's data input
@@ -21,7 +21,9 @@ Adafruit_NeoPixel strip = Adafruit_NeoPixel(210, PIN, NEO_GRB + NEO_KHZ800);
 
 void setup() {
   // This is for Trinket 5V 16MHz, you can remove these three lines if you are not using a Trinket
-
+  #if defined (__AVR_ATtiny85__)
+    if (F_CPU == 16000000) clock_prescale_set(clock_div_1);
+  #endif
   // End of trinket special code
 
 
@@ -31,20 +33,17 @@ void setup() {
 
 void loop() {
   // Some example procedures showing how to display to the pixels:
- /* colorWipe(strip.Color(255, 0, 0), 50); // Red
+  colorWipe(strip.Color(255, 0, 0), 50); // Red
   colorWipe(strip.Color(0, 255, 0), 50); // Green
   colorWipe(strip.Color(0, 0, 255), 50); // Blue
   // Send a theater pixel chase in...
   theaterChase(strip.Color(127, 127, 127), 50); // White
   theaterChase(strip.Color(127, 0, 0), 50); // Red
   theaterChase(strip.Color(0, 0, 127), 50); // Blue
-*/
+
   rainbow(20);
-  //rainbowCycle(20);
-  //theaterChaseRainbow(50);
-  //theaterChase(strip.Color(255, 255, 255), 50); // White
-  //theaterChase(strip.Color(127, 127, 127), 50); // White
- // colorWipe(strip.Color(0, 255, 0), 50); // Green
+  rainbowCycle(20);
+  theaterChaseRainbow(50);
 }
 
 // Fill the dots one after the other with a color
@@ -131,7 +130,3 @@ uint32_t Wheel(byte WheelPos) {
   WheelPos -= 170;
   return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
 }
-
-
-
-
