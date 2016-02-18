@@ -1,6 +1,6 @@
-#include <Adafruit_NeoPixel.h>
-#define HANG_TIME 5000
-#define DISABLED_TIME 15000
+#include "Arduino.h"
+#define HANG_TIME 10000
+#define DISABLED_TIME 10000
 
 enum StripRoutine {
   fade,
@@ -11,19 +11,21 @@ class Strip {
 
   private:
 
-    Adafruit_NeoPixel strip;
+    Adafruit_NeoPixel *strip;
     StripRoutine routine;
     int direction;
-    int waitUntil;
+    uint32_t waitUntil;
+    int disabled;
+    uint32_t disabledUntil;
     double fadeSteps;
 
     void setStripColor(uint32_t color) {
       
-      for(uint16_t i=0; i<strip.numPixels(); i++) {
+      for(uint16_t i=0; i<strip->numPixels(); i++) {
         
-        strip.setPixelColor(i, color);
-        strip.show();
+        strip->setPixelColor(i, color);
       }
+      strip->show();
     }
 
     // Input a value 0 to 255 to get a color value.
@@ -33,15 +35,15 @@ class Strip {
       wheelPos = 255 - wheelPos;
       if(wheelPos < 85) {
         
-        return strip.Color(255 - wheelPos * 3, 0, wheelPos * 3);
+        return strip->Color(255 - wheelPos * 3, 0, wheelPos * 3);
       }
       if(wheelPos < 170) {
         
         wheelPos -= 85;
-        return strip.Color(0, wheelPos * 3, 255 - wheelPos * 3);
+        return strip->Color(0, wheelPos * 3, 255 - wheelPos * 3);
       }
       wheelPos -= 170;
-      return strip.Color(wheelPos * 3, 255 - wheelPos * 3, 0);
+      return strip->Color(wheelPos * 3, 255 - wheelPos * 3, 0);
     }
 
 
@@ -50,15 +52,15 @@ class Strip {
       wheelPos = 255 - wheelPos;
       if(wheelPos < 85) {
         
-        return strip.Color((255 - wheelPos * 3) * intensity, 0, (wheelPos * 3) * intensity);
+        return strip->Color((255 - wheelPos * 3) * intensity, 0, (wheelPos * 3) * intensity);
       }
       if(wheelPos < 170) {
         
         wheelPos -= 85;
-        return strip.Color(0, (wheelPos * 3) * intensity, (255 - wheelPos * 3) * intensity);
+        return strip->Color(0, (wheelPos * 3) * intensity, (255 - wheelPos * 3) * intensity);
       }
       wheelPos -= 170;
-      return strip.Color((wheelPos * 3) * intensity, (255 - wheelPos * 3) * intensity, 0);
+      return strip->Color((wheelPos * 3) * intensity, (255 - wheelPos * 3) * intensity, 0);
     }
 
     void fadeStep() {
@@ -76,20 +78,26 @@ class Strip {
         if (direction == 1) {
 
           stepNum = fadeSteps - stepsLeft;
+          stepsLeft--;
         } else {
-
+          
+          stepsLeft--;
           stepNum = stepsLeft;
+          Serial.println(stepNum);
         }
+        
         double intensity = stepNum / fadeSteps;
         this->setStripColor(this->color(fadeColor[0], fadeColor[1], fadeColor[2], intensity));
-        stepsLeft--;
-        if (stepsLeft == 0 && direction == 1) {
+        
+        if (stepsLeft <= 0 && direction == 1) {
 
           waiting = 1;
           waitUntil = millis() + HANG_TIME;
-        } else if (stepsLeft == 0 && direction == -1) {
-
+          stepsLeft = fadeSteps;
+        } else if (stepsLeft <= 0 && direction == -1) {
+          
           active = 0;
+          stepsLeft = fadeSteps;
         }
       }
     }
@@ -102,25 +110,37 @@ class Strip {
     uint32_t fadeColor[3];
   
     Strip(uint16_t ledCount = 300, uint8_t pin = 1) {
-      
-      strip = Adafruit_NeoPixel(ledCount, pin, NEO_GRB + NEO_KHZ800);
-      strip.begin();
-      strip.show();
+      strip = new Adafruit_NeoPixel(ledCount, pin, NEO_GRB + NEO_KHZ800);
+      strip->begin();
+      strip->show();
       active = 0;
+      disabled = 0;
       waiting = 0;
       direction = 1;
-      fadeSteps = 25;
-      fadeColor[0] = 255;
+      fadeSteps = 50;
+      fadeColor[0] = 0;
       fadeColor[1] = 255;
       fadeColor[2] = 255;
     }
 
     void startRoutine(StripRoutine newRoutine) {
 
-      routine = newRoutine;
-      active = 1;
-      direction = 1;
-      stepsLeft = fadeSteps;
+      if (disabled == 0) {
+        
+        routine = newRoutine;
+        active = 1;
+        direction = 1;
+        stepsLeft = fadeSteps;
+        disabled = 1;
+        disabledUntil = millis() + DISABLED_TIME;
+        Serial.println(disabledUntil);
+      } else {
+
+        if (millis() > disabledUntil) {
+          disabled = 0;
+        }
+      }
+      
     }
 
     void step() {
@@ -141,7 +161,8 @@ class Strip {
 
     uint32_t color(uint8_t r, uint8_t g, uint8_t b, double intensity = 1) {
       
-      return strip.Color(r * intensity, g * intensity, b * intensity);
+      return strip->Color(r * intensity, g * intensity, b * intensity);
     }
 
 };
+
