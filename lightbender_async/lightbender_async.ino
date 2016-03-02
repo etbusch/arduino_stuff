@@ -40,6 +40,7 @@ void setup() {
 
   #if DEBUG
     Serial.begin(9600);
+    Serial.print("Free RAM: ");
     Serial.println(freeRam());
   #endif
 }
