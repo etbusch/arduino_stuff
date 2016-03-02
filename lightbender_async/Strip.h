@@ -1,6 +1,4 @@
 #include "Arduino.h"
-#define HANG_TIME 10000
-#define DISABLED_TIME 10000
 
 enum StripRoutine {
   fade,
