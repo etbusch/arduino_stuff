@@ -3,7 +3,7 @@
   #include <avr/power.h>
 #endif
 
-#define PIN 3
+#define PIN 5
 
 // Parameter 1 = number of pixels in strip
 // Parameter 2 = Arduino pin number (most are valid)
@@ -12,7 +12,7 @@
 //   NEO_KHZ400  400 KHz (classic 'v1' (not v2) FLORA pixels, WS2811 drivers)
 //   NEO_GRB     Pixels are wired for GRB bitstream (most NeoPixel products)
 //   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(210, PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(300, PIN, NEO_GRB + NEO_KHZ800);
 
 // IMPORTANT: To reduce NeoPixel burnout risk, add 1000 uF capacitor across
 // pixel power leads, add 300 - 500 Ohm resistor on first pixel's data input
@@ -21,10 +21,10 @@ Adafruit_NeoPixel strip = Adafruit_NeoPixel(210, PIN, NEO_GRB + NEO_KHZ800);
 
 void setup() {
   // This is for Trinket 5V 16MHz, you can remove these three lines if you are not using a Trinket
-
+  Serial.begin(9600);
   // End of trinket special code
 
-
+  pinMode(9, INPUT);
   strip.begin();
   strip.show(); // Initialize all pixels to 'off'
 }
@@ -39,11 +39,23 @@ void loop() {
   theaterChase(strip.Color(127, 0, 0), 50); // Red
   theaterChase(strip.Color(0, 0, 127), 50); // Blue
 */
-  uint32_t c = strip.Color(255, 255, 255);
+  uint32_t on = strip.Color(255, 255, 255);
+  uint32_t off = strip.Color(0, 0, 0);
+  
+  if (digitalRead(9)) {
+    Serial.println("on");
+    for(int i=0; i<strip.numPixels(); i++) {
+      strip.setPixelColor(i, on);
+    }
+    strip.show();
+  } else {
+    for(int i=0; i<strip.numPixels(); i++) {
+      strip.setPixelColor(i, on);
+    }
+    strip.show();
+  }
   
   
-  
-  rainbow(0);
   //rainbowCycle(20);
   //theaterChaseRainbow(50);
   //theaterChase(strip.Color(255, 255, 255), 50); // White
