@@ -20,7 +20,7 @@ StripRoutine routine = fade;
 
 Strip *strips[STRIP_COUNT];
 
-SoftwareSerial serial(10, 11, true);
+SoftwareSerial serial(20, 21, true);
 
 void setup() {
 
@@ -40,6 +40,7 @@ void setup() {
   #endif
 
   // flush bootup garbage from the serial buffer
+  serial.begin(9600);
   for (int i = 0; i < 256; i++) {
     serial.read();
   }
