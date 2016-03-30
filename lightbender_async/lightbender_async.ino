@@ -1,5 +1,6 @@
 #include <TimerOne.h>
 #include <Adafruit_NeoPixel.h>
+#include <SoftwareSerial.h>
 
 //debugging switch
 #define DEBUG 1
@@ -8,10 +9,7 @@
 #define DISABLED_TIME 10000
 #define FADE_STEPS 25
 
-
-#define SENSOR_COUNT 4
-#define SENSOR_START_PIN 6
-#define STRIP_COUNT 4
+#define STRIP_COUNT 2
 #define STRIP_LED_COUNT 300
 #define STRIP_START_PIN 2
 
@@ -22,16 +20,13 @@ StripRoutine routine = fade;
 
 Strip *strips[STRIP_COUNT];
 
+SoftwareSerial serial(10, 11, true);
+
 void setup() {
 
   // init strip objects
   for (int i = 0; i < STRIP_COUNT; i++) {
       strips[i]= new Strip(STRIP_LED_COUNT, STRIP_START_PIN + i);
-  }
-   
-  // init input pins
-  for(int i=SENSOR_START_PIN; i < SENSOR_COUNT + SENSOR_START_PIN; i++){
-      pinMode(i, INPUT);
   }
 
   // init timer interrupt
@@ -43,6 +38,11 @@ void setup() {
     Serial.print("Free RAM: ");
     Serial.println(freeRam());
   #endif
+
+  // flush bootup garbage from the serial buffer
+  for (int i = 0; i < 256; i++) {
+    serial.read();
+  }
 }
 
 void loop() {
@@ -51,18 +51,36 @@ void loop() {
     for (int i = 0; i < STRIP_COUNT; i++) {
       strips[i]->step();
     }
+    Serial.print("data: ");
+    Serial.println(readSensorSerial());
     interrupts();
+
 }
 
 void updateStatus() {
   
-  for(int i=SENSOR_START_PIN; i < SENSOR_COUNT + SENSOR_START_PIN; i++) {
-
-      if (digitalRead(i)) {
-        strips[i - SENSOR_START_PIN]->startRoutine(routine);
-      }
-  }
+ delay(1);
 }
+
+unsigned short readSensorSerial()
+{
+    char buffer[3];
+
+    // flush and wait for a range reading
+    serial.flush();
+
+    while (!serial.available() || serial.read() == 'R');
+
+    // read the range
+    for (int i = 0; i < 3; i++) {
+        while (!serial.available());
+
+        buffer[i] = serial.read();
+    }
+
+    return atoi(buffer);
+}
+
 
 #if DEBUG
 int freeRam() {

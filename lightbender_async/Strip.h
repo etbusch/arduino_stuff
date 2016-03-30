@@ -81,7 +81,9 @@ class Strip {
           
           stepsLeft--;
           stepNum = stepsLeft;
+          #if DEBUG
           Serial.println(stepNum);
+          #endif
         }
         
         double intensity = stepNum / fadeSteps;
@@ -131,7 +133,9 @@ class Strip {
         stepsLeft = fadeSteps;
         disabled = 1;
         disabledUntil = millis() + DISABLED_TIME;
+        #if DEBUG
         Serial.println(disabledUntil);
+        #endif
       } else {
 
         if (millis() > disabledUntil) {
