@@ -62,14 +62,14 @@ void updateStatus() {
  delay(1);
 }
 
-unsigned short readSensorSerial()
+int readSensorSerial()
 {
     char buffer[3];
 
     // flush and wait for a range reading
     serial.flush();
 
-    while (!serial.available() || serial.read() == 'R');
+    while (!serial.available() || serial.read() != 'R');
 
     // read the range
     for (int i = 0; i < 3; i++) {
