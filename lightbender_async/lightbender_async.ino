@@ -1,4 +1,4 @@
-#include <TimerOne.h>
+
 #include <Adafruit_NeoPixel.h>
 #include <SoftwareSerial.h>
 
@@ -30,13 +30,12 @@ void setup() {
   }
 
   // init timer interrupt
-  Timer1.initialize(10000);
-  Timer1.attachInterrupt(updateStatus);
+ // Timer1.initialize(10000);
+ // Timer1.attachInterrupt(updateStatus);
 
   #if DEBUG
     Serial.begin(9600);
-    Serial.print("Free RAM: ");
-    Serial.println(freeRam());
+    Serial.println("hello");
   #endif
 
   // flush bootup garbage from the serial buffer
@@ -47,20 +46,16 @@ void setup() {
 
 void loop() {
   
-    noInterrupts();
+
     for (int i = 0; i < STRIP_COUNT; i++) {
       strips[i]->step();
     }
     Serial.print("data: ");
     Serial.println(readSensorSerial());
-    interrupts();
+
 
 }
 
-void updateStatus() {
-  
- delay(1);
-}
 
 int readSensorSerial()
 {
@@ -82,11 +77,3 @@ int readSensorSerial()
 }
 
 
-#if DEBUG
-int freeRam() {
-
-  extern int __heap_start, *__brkval; 
-  int v; 
-  return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval); 
-}
-#endif
