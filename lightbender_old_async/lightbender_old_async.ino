@@ -11,6 +11,7 @@
 
 #define SENSOR_TRIGGER_DISTANCE 50
 #define SENSOR_EXCLUDE_DISTANCE 300
+#define STRIP_CASCADE_WAIT 100
 
 
 #define SENSOR_COUNT 4
@@ -19,12 +20,14 @@
 #define STRIP_LED_COUNT 300
 #define STRIP_START_PIN 2
 
-
 #include "Strip.h"
 
 SoftwareSerial sensorSerial(20, 21, true);
 
 int lastSensorReading = 100;
+bool triggered = 0;
+int triggeredTimestamp = 0;
+
 
 StripRoutine routine = fade;
 
@@ -56,27 +59,50 @@ void setup() {
 void loop() {
   
     noInterrupts();
-    for (int i = 0; i < STRIP_COUNT; i++) {
-      strips[i]->step();
-    }
+    step();
     interrupts();
+}
+
+void step() {
+      
+  for (int i = 0; i < STRIP_COUNT; i++) {
+    
+    strips[i]->step();
+
+    if(triggered) {
+
+      int timeSinceTrigger = millis() - triggeredTimestamp;
+      int stripToTrigger = timeSinceTrigger / STRIP_CASCADE_WAIT;      
+      if (stripToTrigger == i) {
+
+        strips[i]->startRoutine(routine);
+      }
+
+      if (stripToTrigger > STRIP_COUNT) {
+        
+        triggered = 0;
+      }
+    }
+  }
 }
 
 void updateStatus() {
   
   int reading = readSensorSerial();
+  
   #if DEBUG
-  Serial.print("reading: ");
-  Serial.print(reading);
-  Serial.print(" change: ");
-  Serial.println(lastSensorReading - reading);
+    Serial.print("reading: ");
+    Serial.print(reading);
+    Serial.print(" change: ");
+    Serial.println(lastSensorReading - reading);
   #endif
+  
   if (lastSensorReading - reading > SENSOR_TRIGGER_DISTANCE && lastSensorReading - reading < SENSOR_EXCLUDE_DISTANCE) {
     
     for (int i=SENSOR_START_PIN; i < SENSOR_COUNT + SENSOR_START_PIN; i++) {
 
-      strips[i - SENSOR_START_PIN]->startRoutine(routine);
-
+      triggered = 1;
+      triggeredTimestamp = millis();
     }
   }
   lastSensorReading = reading;
@@ -84,10 +110,9 @@ void updateStatus() {
 
 
 
-int readSensorSerial()
-{
+int readSensorSerial() {
+  
     char buffer[3];
-
     if (sensorSerial.available()) {
       
       for (int j = 0; j < 20; j++) {
